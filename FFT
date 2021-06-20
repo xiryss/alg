@@ -1,0 +1,56 @@
+const int lgg = 20;
+const int MAXN = (1 << lgg);
+int n;
+int rev[MAXN];
+int tn;
+mycomplex w[MAXN];
+int tlgg;
+void initFFT()
+{
+	for (int i = 0; i < tn; ++i)
+	{
+		w[i] = mycomplex(cos(2 * PI * i / tn), sin(2 * PI * i / tn));
+	}
+	for (int i = 1; i < tn; ++i)
+	{
+		rev[i] = ((rev[i >> 1] >> 1) ^ ((i & 1) << (tlgg - 1)));
+	}
+}
+void fft(mycomplex * A, bool invert)
+{
+	for (int i = 0; i < tn; ++i) if (i < rev[i]) swap(A[i], A[rev[i]]);
+	for (int l = 0; l < tlgg; ++l)
+	{
+		int len = (1 << l);
+		for (int i = 0; i < tn; i += (len << 1))
+		{
+			for (int x = 0; x < len; ++x)
+			{
+				mycomplex xx = A[i + x], yy = A[i + len + x] * w[x << (tlgg - 1 - l)];
+				A[i + x] = xx + yy;
+				A[i + x + len] = xx - yy;
+			}
+		}
+	}
+	if (invert)
+	{
+		reverse(A + 1, A + tn);
+		for (int i = 0; i < tn; ++i)A[i].im /= tn;
+	}
+}
+mycomplex fs[MAXN];
+vector<int> mult(vector<int> a, vector<int> b)
+{
+	for (int i = 0; i < tn; ++i)
+	{
+		fs[i] = mycomplex(0, 0);
+		if (i < a.size())fs[i].re = a[i];
+		if (i < b.size()) fs[i].im = b[i];
+	}
+	fft(fs,0);
+	for (int i = 0; i < tn; ++i) fs[i] = fs[i] * fs[i];
+	fft(fs,1);
+	vector<int> ans(tn);
+	for (int i = 0; i < tn; ++i) ans[i] = (ll)(fs[i].im / (2) + 0.5);
+	return ans;
+}
