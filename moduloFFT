@@ -1,0 +1,111 @@
+
+const int lgg = 21;
+const int MAXN = (1 << 21);
+int g = 3;
+int mul(int a, int b)
+{
+	return 1ll * a * b % mod;
+}
+int add(int a, int b)
+{
+	if (a + b >= mod) return a + b - mod;
+	return a + b;
+}
+int sub(int a, int b)
+{
+	if (a - b < 0) return a - b + mod;
+	return a - b;
+}
+int binpow(int a, int b)
+{
+	int res = 1;
+	while (b)
+	{
+		if (b & 1)res = mul(res, a);
+		a = mul(a, a);
+		b >>= 1;
+	}
+	return res;
+}
+int inv(int x)
+{
+	return binpow(x, mod - 2);
+}
+int fact[MAXN]; int rfact[MAXN];
+int cnk(int n, int k)
+{
+	if (n<0 || k>n) return 0;
+	return mul(fact[n], mul(rfact[k], rfact[n - k]));
+}
+int n;
+int rev[MAXN];
+int tn;
+int w[MAXN];
+
+int tlgg;
+void initFFT()
+{
+	int lol = binpow(g, (mod - 1) / tn);
+	w[0] = 1;
+	for (int i = 1; i < tn; ++i)
+	{
+		w[i] = mul(w[i - 1], lol);
+	}
+	for (int i = 1; i < tn; ++i)
+	{
+		rev[i] = ((rev[i >> 1] >> 1) ^ ((i & 1) << (tlgg - 1)));
+	}
+}
+void fft(int* A, bool invert)
+{
+	for (int i = 0; i < tn; ++i) if (i < rev[i]) swap(A[i], A[rev[i]]);
+	for (int l = 0; l < tlgg; ++l)
+	{
+		int len = (1 << l);
+		for (int i = 0; i < tn; i += (len << 1))
+		{
+			for (int x = 0; x < len; ++x)
+			{
+				int xx = A[i + x], yy = mul(A[i + len + x], w[x << (tlgg - 1 - l)]);
+				A[i + x] = add(xx,yy);
+				A[i + x + len] = sub(xx,yy);
+			}
+		}
+	}
+	if (invert)
+	{
+		int ttx = inv(tn);
+		reverse(A + 1, A + tn);
+		for (int i = 0; i < tn; ++i) A[i] = mul(A[i], ttx);
+	}
+}
+int fs[MAXN];
+int ss[MAXN];
+vector<int> mult(vector<int> a, vector<int> b)
+{
+	a.resize(tn);
+	b.resize(tn);
+	for (int i = 0; i < tn; ++i)
+	{
+		fs[i] = a[i];
+		ss[i] = b[i];
+	}
+	fft(fs, 0);
+	fft(ss, 0);
+	for (int i = 0; i < tn; ++i) fs[i] = mul(fs[i], ss[i]);
+	fft(fs, 1);
+	vector<int> ans(tn);
+	for (int i = 0; i < tn; ++i) ans[i] = fs[i];
+	return ans;
+}
+vector<int> func(int a, int b, int p)
+{
+	vector<int> ans(p + 1);
+	int nw = 1;
+	for (int i = 0; i <= p; ++i)
+	{
+		ans[i] = mul(cnk(p, i), nw);
+		nw = mul(nw, a);
+	}
+	return ans;
+}
