@@ -1,0 +1,45 @@
+
+struct line
+{
+	ll a, b;
+	line(ll x, ll y)
+	{
+		a = x, b = y;
+	}
+	line()
+	{
+		a = b = 0;
+	}
+};
+ld intersect(line a, line b)
+{
+	return (ld)(a.b - b.b) / (b.a - a.a);
+}
+ld getval(line a, ld x)
+{
+	return a.a * x + a.b;
+}
+struct CHT
+{
+	vector<line> lines;
+	vector<ld> xs;
+	void add(line a)
+	{
+		while (xs.size() && getval(a, xs.back()) > getval(lines.back(), xs.back()))
+		{
+			lines.pob;
+			xs.pob;
+		}
+		if (!lines.size()) lines = { a };
+		else
+		{
+			xs.pbc(intersect(lines.back(), a));
+			lines.pbc(a);
+		}
+	}
+	ll get(ll x)
+	{
+		auto xx = upper_bound(all(xs), (ld)x) - xs.begin();
+		return getval(lines[xx], x);
+	}
+};
