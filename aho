@@ -1,0 +1,53 @@
+struct node
+{
+	int link;
+	int go[ligma];
+//	int len;
+	int id;
+	int term;
+	node()
+	{
+		link = id = term = 0;
+		go[0] = go[1] = 0;
+		term = -1;
+	}
+};
+node t[MAXN];
+int sz = 1;
+void add(string s, int id)
+{
+	int v = 0;
+	for (auto i : s)
+	{
+		if (!t[v].go[i - 'a'])
+		{
+			t[v].go[i - 'a'] = sz++;
+			//t[sz - 1].len = t[v].len + 1;	
+		}
+		v = t[v].go[i - 'a'];
+	}
+	t[v].id = id;
+	t[v].term = v;
+}
+int qsz = 0;
+int q[MAXN];
+void buildlinks()
+{
+	qsz = 0;
+	q[qsz++] = 0;
+	for (int ti = 0; ti < qsz; ++ti)
+	{
+		int v = q[ti];
+		int lol = t[v].link;
+		if (t[v].term == -1) t[v].term = t[lol].term;
+		for (int j = 0; j < ligma; ++j)
+		{
+			if (t[v].go[j])
+			{
+				t[t[v].go[j]].link = (v ? t[lol].go[j] : 0);
+				q[qsz++] = t[v].go[j];
+			}
+			else t[v].go[j] = t[lol].go[j];
+		}
+	}
+}
