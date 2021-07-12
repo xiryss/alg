@@ -1,0 +1,17 @@
+
+vector<ll> xorconvo(vector<ll> a)
+{
+	for (int h = 0; (1 << h) < a.size(); ++h)
+	{
+		for (int i = 0; i +(1<<h)<a.size(); i += (2<<h))
+		{
+			for (int x = i; x < i + (1 << h); ++x)
+			{
+				ll fs = a[x], ss = a[x + (1 << h)];
+				a[x] = add(fs, ss);
+				a[x + (1 << h)] = sub(fs, ss);
+			}
+		}
+	}
+	return a;
+}
