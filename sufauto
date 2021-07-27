@@ -1,0 +1,103 @@
+
+struct node
+{
+	int link;
+	unordered_map<char, int> nxt;
+	int len;
+	int pref;
+	node()
+	{
+		link = len = pref = 0;
+		nxt.clear();
+	}
+};
+const int MAXN = 5e5 + 1337;
+struct SA
+{
+	vector<node> t;
+	int sz, last;
+	vector<vector<int>> g;
+	vector<int> am;
+	vector<int> sm;
+	SA()
+	{
+		sz = 1;
+		t.resize(MAXN);
+		am.resize(MAXN);
+		sm.resize(MAXN);
+		last = 0;
+		g.resize(MAXN);
+		t[0] = node();
+		t[0].link = -1;
+	}
+	void addchar(char c)
+	{
+		int nw = sz++;
+		t[nw] = node();
+		t[nw].len = t[last].len + 1;
+		int  p = last;
+		t[nw].pref = t[nw].len - 1;
+		while (p >= 0 && !t[p].nxt.count(c))
+		{
+			t[p].nxt[c] = nw;
+			p = t[p].link;
+		}
+		if (p == -1)
+		{
+			t[nw].link = 0;
+		}
+		else
+		{
+			int q = t[p].nxt[c];
+			if (t[p].len + 1 == t[q].len)
+			{
+				t[nw].link = q;
+			}
+			else
+			{
+				int clone = sz++;
+				t[clone].link = t[q].link;
+ 
+				t[q].link = t[nw].link = clone;
+				t[clone].nxt = t[q].nxt;
+				t[clone].pref = -228;
+				t[clone].len = t[p].len + 1;
+				while (p >= 0 && t[p].nxt[c] == q)
+				{
+					t[p].nxt[c] = clone;
+					p = t[p].link;
+				}
+			}
+		}
+		last = nw;
+	}
+	void init()
+	{
+		for (int i = 1; i < sz; ++i)
+		{
+			g[t[i].link].pbc(i);
+		}
+	}
+	void dfs(int v)
+	{
+		if (t[v].pref != -228)
+		{
+			am[t[v].pref] += sm[v];
+		}
+		for (int i : g[v])
+		{
+			sm[i] += sm[v];
+			dfs(i);
+		}
+	}
+	int rd(string s)
+	{
+		int v = 0;
+		for (auto i : s)
+		{
+			if (!t[v].nxt.count(i)) return -1;
+			v = t[v].nxt[i];
+		}
+		return v;
+	}
+};
