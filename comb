@@ -30,6 +30,6 @@ int inv(int x)
 int fact[MAXN]; int rfact[MAXN];
 int cnk(int n, int k)
 {
-	if (n<0 || k>n) return 0;
+	if (k<0 || k>n) return 0;
 	return mul(fact[n], mul(rfact[k], rfact[n - k]));
 }
