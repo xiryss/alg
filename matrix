@@ -1,0 +1,40 @@
+vector<vector<int>> mult(vector<vector<int>> a, vector<vector<int>> b)
+{
+    vector<vector<int>> res(a.size(), vector<int>(b[0].size()));
+    for (int k = 0; k < a[0].size(); ++k)
+    {
+        for (int i = 0; i < a.size(); ++i)
+        {
+            for (int j = 0; j < b[0].size(); ++j)
+            {
+                res[i][j] = add(res[i][j], mul(a[i][k], b[k][j]));
+                if (res[i][j] >= mod)
+                {
+                    cout << "PENIS";
+                }
+            }
+        }
+    }
+    return res;
+}
+vector<vector<int>>binpow(vector<vector<int>> a, int b)
+{
+    vector<vector<int>> res(a.size(), vector<int>(a.size()));
+    for (int i = 0; i < a.size(); ++i) res[i][i] = 1;
+    while (b)
+    {
+        if (b & 1)res = mult(res, a);
+        a = mult(a, a);
+        b >>= 1;
+    }
+    return res;
+}
+int getk(int k)
+{
+    k += 2;
+    vector<vector<int>> mtx = { {1,1},{1,0} };
+    vector<vector<int>> fs = { {0,1} };
+    auto nw = binpow(mtx, k-1);
+    fs = mult(fs, nw);
+    return fs[0][1];
+}
