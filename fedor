@@ -1,0 +1,27 @@
+
+int func(int a, int b, int k)
+{
+    if (a < b) swap(a, b);
+    if (a >= k)
+    {
+        int res = (a - k + 1) * (b + 1);
+        if (b >= k)
+        {
+            res += k * (b+1) - k * (k + 1) / 2;
+            return res;
+        }
+        else
+        {
+            res += b * (b + 1) / 2;
+            return res;
+        }
+    }
+    else
+    {
+        int mn = k - a;
+        
+        int var = b + 1 - mn;
+        if (var < 0) return 0;
+        return var * (var + 1) / 2;
+    }
+}
