@@ -8,10 +8,6 @@ vector<vector<int>> mult(vector<vector<int>> a, vector<vector<int>> b)
             for (int j = 0; j < b[0].size(); ++j)
             {
                 res[i][j] = add(res[i][j], mul(a[i][k], b[k][j]));
-                if (res[i][j] >= mod)
-                {
-                    cout << "PENIS";
-                }
             }
         }
     }
