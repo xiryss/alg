@@ -1,0 +1,16 @@
+int p[MAXN], rnk[MAXN];
+int fin(int v)
+{
+	return v == p[v] ? v : p[v] = fin(p[v]);
+}
+void make(int v)
+{
+	p[v] = v; rnk[v] = 0;
+}
+void unite(int a, int b)
+{
+	a = fin(a), b = fin(b); if (a == b)return;
+	if (rnk[a] < rnk[b])swap(a, b);
+	rnk[a] += (rnk[a] == rnk[b]);
+	p[b] = a;
+}
