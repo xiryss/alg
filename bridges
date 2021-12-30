@@ -1,0 +1,27 @@
+
+const int MAXN = 4e5 + 228;
+vector<int> g[MAXN];
+int tl = 0;
+int tin[MAXN];
+int fup[MAXN];
+int used[MAXN];
+vector<pair<int, int>> brg;
+void dfs(int v, int p)
+{
+	used[v] = 1;
+	tin[v] = fup[v] = tl++;
+	for (int i : g[v])
+	{
+		if (i == p) continue;
+		if (used[i])fup[v] = min(fup[v], tin[i]);
+		else
+		{
+			dfs(i, v);
+			fup[v] = min(fup[v], fup[i]);
+			if (fup[i] > tin[v])
+			{
+				brg.pbc({ min(i,v),max(i,v) });
+			}
+		}
+	}
+}
