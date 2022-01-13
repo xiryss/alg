@@ -1,0 +1,106 @@
+struct node
+{
+	node* l, * r;
+	int sz;
+	int val;
+	int y;
+	int id;
+	int mx;
+	node()
+	{
+		l = r = nullptr;
+		sz = 0;
+		y = rnd();
+		val =mx=0;
+		id = -1;
+	}
+	node(int x, int idd)
+	{
+		val = mx=x;
+		sz = 1;
+		y = rnd();
+		id = idd;
+		l = r = nullptr;
+	}
+};
+int gmx(node* v)
+{
+	if (v == nullptr) return -inf;
+	return v->mx;
+}
+int gsz(node* v)
+{
+	if (v == nullptr) return 0;
+	return v->sz;
+}
+void recalc(node* v)
+{
+	if (v == nullptr)return;
+	v->mx = max({ v->val, gmx(v->l), gmx(v->r) });
+	v->sz = 1 + gsz(v->l) + gsz(v->r);
+}
+node* merge(node* v1, node* v2)
+{
+	if (v1 == nullptr) return v2;
+	if (v2 == nullptr) return v1;
+	if (v1->y > v2->y)
+	{
+		v1->r = merge(v1->r, v2);
+		recalc(v1);
+		return v1;
+	}
+	else
+	{
+		v2->l = merge(v1, v2->l);
+		recalc(v2);
+		return v2;
+	}
+}
+pair< node*, node*> split(node* v, int sz)
+{
+	if (v == nullptr)
+	{
+		return { nullptr, nullptr };
+	}
+	if (gsz(v->l)>=sz)
+	{
+		auto ww = split(v->l, sz);
+		v->l = ww.second;
+		recalc(v);
+		return { ww.first, v };
+	}
+	else
+	{
+		auto ww = split(v->r, sz - gsz(v->l) - 1);
+		v->r = ww.first;
+		recalc(v);
+		return { v, ww.second };
+	}
+}
+int findpref(node* v, int x)
+{
+	if (v == nullptr) return 0;
+	if (v->mx < x) return v->sz;
+	if (gmx(v->l) >= x)
+	{
+		return findpref(v->l,x);
+	}
+	else if (v->val >= x)
+	{
+		return gsz(v->l);
+	}
+	else
+	{
+		return findpref(v->r, x) + 1 + gsz(v->l);
+	}
+}
+void dfs(node* v)
+{
+	if (v == nullptr)
+	{
+		return;
+	}
+	dfs(v->r);
+	cout << v->id << ' ';
+	dfs(v->l);
+}
