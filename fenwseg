@@ -1,0 +1,39 @@
+
+void addk(int p, int r, int x)
+{
+	for (; r < MAXN; r |= (r + 1)) fk[p][r] += x;
+}
+void addb(int p, int r, int x)
+{
+	for (; r < MAXN; r |= (r + 1)) fb[p][r] += x;
+}
+ll getk(int p, int r)
+{
+	ll res = 0;
+	for (; r >= 0; r = (r & (r + 1)) - 1) res += fk[p][r];
+	return res;
+}
+ll getb(int p, int r)
+{
+	ll res = 0;
+	for (; r >= 0; r = (r & (r + 1)) - 1) res += fb[p][r];
+	return res;
+}
+void add(int p, int i, int j, int d)
+{
+	addb(p, i, -(i - 1) * d);
+	addb(p, j + 1, (i - 1) * d);
+	addb(p, j + 1, (j - i + 1) * d);
+	addk(p, i, d);
+	addk(p, j + 1, -d);
+}
+ll get(int p, int r)
+{
+	ll x = getk(p, r);
+	ll y = getb(p, r);
+	return x * r + y;
+}
+ll get(int p, int l, int r)
+{
+	return get(p, r) - get(p, l - 1);
+}
