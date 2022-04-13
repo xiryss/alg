@@ -1,0 +1,82 @@
+const int MAXN = 1e5 + 228;
+vector<pair<int, int>> e;
+vector<int> g[MAXN];
+int tin[MAXN];
+int fup[MAXN];
+int tl = 0;
+int used[MAXN];
+void dfs(int v, int p)
+{
+	used[v] = 1;
+	tin[v] = fup[v] = tl++;
+	for (int i : g[v])
+	{
+		int u = e[i].first ^ e[i].second ^ v;
+		if (u == p) continue;
+		if (used[u])fup[v] = min(fup[v], tin[u]);
+		else
+		{
+			dfs(u, v);
+			fup[v] = min(fup[v], fup[u]);
+		}
+	}
+}
+int cl[MAXN];
+int mxc = 0;
+void paint(int v, int c, int p)
+{
+	used[v] = 1;
+	for (int i : g[v])
+	{
+		int u = e[i].first ^ e[i].second ^ v;
+		if (u == p) continue;
+		if (!used[u])
+		{
+			if (fup[u] >= tin[v])
+			{
+				int nc = ++mxc;
+				cl[i] = nc;
+				paint(u, nc, v);
+			}
+			else
+			{
+				cl[i] = c;
+				paint(u, c, v);
+			}
+		}
+		else
+		{
+			if (tin[u] < tin[v]) cl[i] = c;
+		}
+	}
+}
+vector<int> rbs[MAXN];
+signed main()
+{
+	ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+	cout.precision(20), cout.setf(ios::fixed);
+	cin >> n >> m;
+	for (int i = 0; i < m; ++i)
+	{
+		int a, b;
+		cin >> a >> b;
+		e.pbc({ a,b });
+		g[a].pbc(i);
+		g[b].pbc(i);
+	}
+	for (int i = 1; i <= n; ++i)
+	{
+		if (!used[i])
+		{
+			dfs(i,i);
+		}
+	}
+	fill(used, used + MAXN, 0);
+	for (int i = 1; i <= n; ++i)
+	{
+		if (!used[i])
+		{
+			++mxc;
+			paint(i, mxc, i);
+		}
+	}
