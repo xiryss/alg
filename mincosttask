@@ -1,0 +1,79 @@
+int n, k;
+struct edge
+{
+    int a, b, cap, cost;
+};
+vector<edge> e;
+const int MAXN = 1e4 + 228;
+vector<int> g[MAXN];
+void addedge(int a, int b, int cap, int cost)
+{
+    g[a].pbc(e.size());
+    e.pbc({ a,b,cap,cost });
+    g[b].pbc(e.size());
+    e.pbc({ b,a,0,-cost });
+}
+signed main()
+{
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    cout.precision(20), cout.setf(ios::fixed);
+    cin >> n >> k;
+    vector<int> a(n), b(n);
+    vin(a);
+    vin(b);
+    int t = MAXN - 1;
+    int s = t - 1;
+    for (int i = 0; i < n; ++i)
+    {
+        addedge(s, i, 1, a[i]);
+        addedge(i, i + n, inf, 0);
+        addedge(i + n, t, 1, b[i]);
+    }
+    for (int i = 0; i + 1 < n; ++i)
+    {
+        addedge(i + n, i + n + 1, inf, 0);
+    }
+    int flow = 0; ll res = 0;
+    while (flow < k)
+    {
+        vector<int> d(MAXN, 2*inf);
+        d[s] = 0;
+        vector<int> pr(MAXN);
+        queue<int> q;
+        q.push(s);
+        while (q.size())
+        {
+            int v = q.front();
+            q.pop();
+            for (int i : g[v])
+            {
+                int   u = e[i].b;
+                if (e[i].cap && d[u] > d[v] + e[i].cost)
+                {
+                    d[u] = d[v] + e[i].cost;
+                    pr[u] = i;
+                    q.push(u);
+                }
+            }
+        }
+        int tx = t;
+        if (d[t] == 2 * inf) break;
+        int gflow = k - flow;
+        while (tx != s)
+        {
+            gflow = min(gflow, e[pr[tx]].cap);
+            tx = e[pr[tx]].a;
+        }
+        tx = t;     
+        while (tx != s)
+        {
+            res += 1ll * gflow * e[pr[tx]].cost;
+            e[pr[tx]].cap -= gflow;
+            e[pr[tx] ^ 1].cap += gflow;
+            tx = e[pr[tx]].a;
+        }
+        flow += gflow;
+    }
+    cout << res;
+    //sp;
+}
