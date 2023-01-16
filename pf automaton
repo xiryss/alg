@@ -1,0 +1,31 @@
+vector<int> pf(string s)
+{
+    int k = 0;
+    vector<int> p(s.size());
+    for (int i = 1; i < s.size(); ++i)
+    {
+        while (k && s[i] != s[k])k = p[k - 1];
+        k += (s[i] == s[k]);
+        p[i] = k;
+    }
+    return p;
+}
+signed main()
+{
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    cout.precision(20), cout.setf(ios::fixed);
+    string s;
+    s += '#';
+    int n = (int)s.length();
+    const int alp = 128;
+
+    vector<int> pi = pf(s);
+    vector < vector<int> > aut(n, vector<int>(alp));
+    for (int i = 0; i < n; ++i)
+        for (char c = 0; c < alp; ++c)
+            if (i > 0 && c != s[i])
+                aut[i][c] = aut[pi[i - 1]][c];
+            else
+                aut[i][c] = i + (c == s[i]);
+    //   sp;
+}
