@@ -1,0 +1,89 @@
+
+class Edmonds {
+public:
+    int n, Time;
+    vector<int> vis, par, orig, match, aux;
+    vector<vector <int> > e;
+ 
+    void addEdge(int u, int v) {
+        e[u].push_back(v), e[v].push_back(u);
+    }
+ 
+    Edmonds() = default;//numerate from 1
+ 
+    explicit Edmonds(int _n) : n(_n), Time(0), vis(n + 1, 0), par(n + 1, 0),
+        orig(n + 1, 0), match(n + 1, 0), aux(n + 1, 0), e(n + 1) {}
+ 
+    void augment(int u, int v) {
+        int pv, nv;
+        do {
+            pv = par[v]; nv = match[pv];
+            match[v] = pv; match[pv] = v;
+            v = nv;
+        } while (u != pv);
+    }
+ 
+    int lca(int v, int w) {
+        ++Time;
+        while (true) {
+            if (v) {
+                if (aux[v] == Time) return v;
+                aux[v] = Time;
+                v = orig[par[match[v]]];
+            }
+            swap(v, w);
+        }
+    }
+ 
+    bool bfs(int u) {
+        fill(vis.begin(), vis.end(), -1);
+        iota(orig.begin(), orig.end(), 0);
+        queue<int> q;
+ 
+        q.push(u); vis[u] = 0;
+ 
+        auto blossom = [&](int v, int w, int a) {
+            while (orig[v] != a) {
+                par[v] = w; w = match[v];
+                if (vis[w] == 1) q.push(w), vis[w] = 0;
+                orig[v] = orig[w] = a;
+                v = par[w];
+            }
+        };
+ 
+        while (!q.empty()) {
+            auto v = q.front(); q.pop();
+            for (auto x : e[v]) {
+                if (vis[x] == -1) {
+                    par[x] = v, vis[x] = 1;
+                    if (!match[x]) return augment(u, x), true;
+                    q.push(match[x]); vis[match[x]] = 0;
+                }
+                else if (vis[x] == 0 && orig[v] != orig[x]) {
+                    int a = lca(orig[v], orig[x]);
+                    blossom(x, v, a); blossom(v, x, a);
+                }
+            }
+        }
+ 
+        return false;
+    }
+ 
+    int max_match() {
+        int ret = 0;
+        vector <int> V(n - 1);
+        iota(V.begin(), V.end(), 1);
+        shuffle(V.begin(), V.end(), rnd);
+        for (auto u : V) {
+            if (match[u]) continue;
+            for (auto v : e[u]) {
+                if (!match[v]) {
+                    match[u] = v, match[v] = u;
+                    ++ret; break;
+                }
+            }
+        }
+        for (int i = 1; i <= n; ++i)if (!match[i] && bfs(i)) ++ret;
+        return ret;
+    }
+} edmonds;
