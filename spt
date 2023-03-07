@@ -1,0 +1,18 @@
+
+const int lgg = 19;
+int spt[MAXN][lgg];
+int cnt[MAXN];
+void build(vector<int>& a) {
+    for (int i = 0; i < a.size(); ++i) spt[i][0] = a[i];
+    for (int i = 2; i <= a.size(); ++i) cnt[i] = cnt[i >> 1] + 1;
+    for (int h = 1; (1 << h) <= n; ++h) {
+        for (int i = 0; i + (1 << (h - 1)) < n; ++i) {
+            spt[i][h] = min(spt[i][h - 1], spt[i + (1 << (h - 1))][h - 1]);
+        }
+    }
+}
+int get(int l, int r) {
+    if (l >= r) return inf;
+    int xx = cnt[r - l];
+    return min(spt[l][xx], spt[r - (1 << xx)][xx]);
+}
