@@ -1,0 +1,26 @@
+
+int t[4 * MAXN];
+void build(int v, int l, int r, vector<int>& a) {
+    if (l == r - 1) {
+        t[v] = a[l];
+        return;
+    }
+    build(2 * v + 1, l, (l + r) / 2, a);
+    build(2 * v + 2, (l + r) / 2, r, a);
+    t[v] = min(t[2 * v + 1], t[2 * v + 2]);
+}
+void upd(int v, int l, int r, int ql, int qr, int x) {
+    if (l >= qr || ql >= r) return;
+    if (l >= ql && r <= qr) {
+        t[v] = x;
+        return;
+    }
+    upd(2 * v + 1, l, (l + r) / 2, ql, qr, x);
+    upd(2 * v + 2, (l + r) / 2, r, ql, qr, x);
+    t[v] = min(t[2 * v + 1], t[2 * v + 2]);
+}
+int get(int v, int l, int r, int ql, int qr) {
+    if (l >= qr || ql >= r) return inf;
+    if (l >= ql && r <= qr) return t[v];
+    return min(get(2 * v + 1, l, (l + r) / 2, ql, qr), get(2 * v + 2, (l + r) / 2, r, ql, qr));
+}
