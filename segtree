@@ -1,26 +1,126 @@
 
-int t[4 * MAXN];
-void build(int v, int l, int r, vector<int>& a) {
-    if (l == r - 1) {
-        t[v] = a[l];
-        return;
+struct SegTree {
+    struct Node {
+        int mn, mx;
+        int upd;
+ 
+        void apply(int x) {
+            upd = mn = mx = x;
+        }
+ 
+        void combine(const Node &a, const Node &b) {
+            mn = min(a.mn, b.mn);
+            mx = max(a.mx, b.mx);
+        }
+ 
+        Node() : mn(0), mx(0), upd(-1) {}
+    };
+ 
+    vector<Node> t;
+    int n;
+ 
+    void build(int k) {
+        n = k;
+        t.resize(n * 4);
     }
-    build(2 * v + 1, l, (l + r) / 2, a);
-    build(2 * v + 2, (l + r) / 2, r, a);
-    t[v] = min(t[2 * v + 1], t[2 * v + 2]);
-}
-void upd(int v, int l, int r, int ql, int qr, int x) {
-    if (l >= qr || ql >= r) return;
-    if (l >= ql && r <= qr) {
-        t[v] = x;
-        return;
+ 
+    void push(int v) {
+        if (t[v].upd == -1) return;
+        t[v << 1].apply(t[v].upd);
+        t[v << 1 | 1].apply(t[v].upd);
+        t[v].upd = -1;
     }
-    upd(2 * v + 1, l, (l + r) / 2, ql, qr, x);
-    upd(2 * v + 2, (l + r) / 2, r, ql, qr, x);
-    t[v] = min(t[2 * v + 1], t[2 * v + 2]);
-}
-int get(int v, int l, int r, int ql, int qr) {
-    if (l >= qr || ql >= r) return inf;
-    if (l >= ql && r <= qr) return t[v];
-    return min(get(2 * v + 1, l, (l + r) / 2, ql, qr), get(2 * v + 2, (l + r) / 2, r, ql, qr));
-}
+ 
+    void upd(int v, int l, int r, int lq, int rq, int x) {
+        if (l >= rq || lq >= r) return;
+        if (lq <= l && r <= rq) {
+            t[v].apply(x);
+            return;
+        }
+        push(v);
+        upd(v << 1, l, (l + r) >> 1, lq, rq, x);
+        upd(v << 1 | 1, (l + r) >> 1, r, lq, rq, x);
+        t[v].combine(t[v << 1], t[v << 1 | 1]);
+    }
+ 
+    Node combine(const Node &a, const Node &b) {
+        Node c;
+        c.combine(a, b);
+        return c;
+    }
+ 
+    Node get(int v, int l, int r, int lq, int rq) {
+        if (lq <= l && r <= rq) {
+            return t[v];
+        }
+        push(v);
+        int mid = (l + r) / 2;
+        if (rq > mid && lq < mid) return combine(get(v << 1, l, mid, lq, rq), get(v << 1 | 1, mid, r, lq, rq));
+        if (rq > mid) return get(v << 1 | 1, mid, r, lq, rq);
+        return get(v << 1, l, mid, lq, rq);
+    }
+ 
+    Node get(int lq, int rq) {
+        return get(1, 0, n, lq, rq);
+    }
+ 
+    void upd(int lq, int rq, int x) {
+        upd(1, 0, n, lq, rq, x);
+    }
+ 
+    int FindBig(int v, int l, int r, int lq, int x) {
+        if (t[v].mx < x || r <= lq) return -1;
+        if (l + 1 == r) return l;
+        push(v);
+        int val = FindBig(v << 1, l, (l + r) >> 1, lq, x);
+        if (val != -1) return val;
+        return FindBig(v << 1 | 1, (l + r) >> 1, r, lq, x);
+    }
+ 
+    // >= x
+    int FindBig(int lq, int x) {
+        return FindBig(1, 0, n, lq, x);
+    }
+ 
+    int FindLow(int v, int l, int r, int lq, int x) {
+        if (t[v].mn > x || r <= lq) return -1;
+        if (l + 1 == r) return l;
+        push(v);
+        int val = FindLow(v << 1, l, (l + r) >> 1, lq, x);
+        if (val != -1) return val;
+        return FindLow(v << 1 | 1, (l + r) >> 1, r, lq, x);
+    }
+ 
+    // <= x
+    int FindLow(int lq, int x) {
+        return FindLow(1, 0, n, lq, x);
+    }
+ 
+    int GetLeft(int v, int l, int r) {
+        if (t[v].mx == 0) return -1;
+        if (l + 1 == r) return l;
+        push(v);
+        int val = GetLeft(v << 1, l, (l + r) >> 1);
+        if (val != -1) return val;
+        return GetLeft(v << 1 | 1, (l + r) >> 1, r);
+    }
+ 
+    int GetRight(int v, int l, int r) {
+        if (t[v].mx == 0) return -1;
+        if (l + 1 == r) return l;
+        push(v);
+        int val = GetRight(v << 1 | 1, (l + r) >> 1, r);
+        if (val != -1) return val;
+        return GetRight(v << 1, l, (l + r) >> 1);
+    }
+ 
+    int GetLeft() {
+        return GetLeft(1, 0, n);
+    }
+ 
+    int GetRight() {
+        return GetRight(1, 0, n);
+    }
+ 
+ 
+};
