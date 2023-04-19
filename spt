@@ -3,6 +3,7 @@ const int lgg = 19;
 int spt[MAXN][lgg];
 int cnt[MAXN];
 void build(vector<int>& a) {
+    int n = a.size();
     for (int i = 0; i < a.size(); ++i) spt[i][0] = a[i];
     for (int i = 2; i <= a.size(); ++i) cnt[i] = cnt[i >> 1] + 1;
     for (int h = 1; (1 << h) <= n; ++h) {
