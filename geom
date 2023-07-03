@@ -1,8 +1,20 @@
 struct point {
-	ll x, y;
+	ld x, y;
 };
 struct line {
 	ld a, b, c;
+	ld eval(point p) {
+		return a * p.x + b * p.y + c;
+	}
+	void flip() {
+		a = -a, b = -b, c = -c;
+	}
+	void norm() {
+		ld d = sqrt(a * a + b * b);
+		a /= d;
+		b /= d;
+		c /= d;
+	}
 };
 ld det(ld a, ld b, ld c, ld d) { return a * d - b * c; }
 point operator+(point a, point b) { return { a.x + b.x,a.y + b.y }; }
@@ -16,6 +28,7 @@ line getln(point a, point b) {
 	res.a = a.y - b.y;
 	res.b = b.x - a.x;
 	res.c = -(a.x * res.a + a.y * res.b);
+	res.norm();
 	return res;
 }
 ld len(point a) { return sqrt(a.x * a.x + a.y * a.y); }
@@ -33,6 +46,7 @@ line perp(line a, point b) {
 	res.a = -a.b;
 	res.b = a.a;
 	res.c = -(res.a * b.x + res.b * b.y);
+	res.norm();
 	return res;
 }
 int sgn(ld x) {
@@ -119,3 +133,95 @@ bool inpoly(const vector<point>& a, point b) {
 	}
 	return l + 1 < a.size() && intriangle(a[0], a[l], a[l + 1], b);
 }
+
+bool bad(line a, line b, line c) {
+	point x = intersect(b, c);
+	assert(x.x < inf);
+	return a.eval(x) > 0;
+}
+
+// Do not forget about the bounding box
+vector<point> hpi(vector<line> lines) {
+	ld C = 1e6;
+	vector<point> pts = { {-C,-C},{C,-C},{C,C},{-C,C} };
+	for (auto i : lines) {
+		vector<point> newpts;
+		vector<point> consider;
+		for (int j = 0; j < pts.size(); ++j) {
+			consider.pbc(pts[j]);
+			point pt = intersect(i, getln(pts[j], pts[(j + 1) % pts.size()]));
+			if (onseg(pts[j], pts[(j + 1) % pts.size()], pt)) {
+				consider.pbc(pt);
+			}
+		}
+		for (auto j : consider) {
+			if (i.eval(j) >= -EPS) {
+				if (newpts.size() && dist(newpts.back(), j) < EPS) {
+					continue;
+				}
+				newpts.pbc(j);
+			}
+		}
+		if (newpts.size() && dist(newpts[0], newpts.back()) < EPS) newpts.pob;
+		swap(pts, newpts);
+	}
+	return pts;
+}
+//vector<point> hpi(vector<line> lines) {
+//	sort(all(lines), [](line al, line bl) -> bool {
+//		point a = getvec(al);
+//		point b = getvec(bl);
+//		if (a.y >= 0 && b.y < 0) return 1;
+//		if (a.y < 0 && b.y >= 0) return 0;
+//		if (a.y == 0 && b.y == 0) return a.x > 0 && b.x < 0;
+//		return (a * b) > 0;
+//		});
+//	for (auto i : lines) {
+//		cout << i.a << ' ' << i.b << ' ' << i.c << endl;
+//	}
+//	vector<pair<line, int> > st;
+//	for (int it = 0; it < 2; it++) {
+//		for (int i = 0; i < (int)lines.size(); i++) {
+//			bool flag = false;
+//			while (!st.empty()) {
+//				if (len(getvec(st.back().first) - getvec(lines[i])) < EPS) {
+//					if (lines[i].c <= st.back().first.c) {
+//						flag = true;
+//						break;
+//					}
+//					else {
+//						st.pop_back();
+//					}
+//				}
+//				else if ((getvec(st.back().first) * getvec(lines[i])) <
+//					EPS / 2) {
+//					return {};
+//				}
+//				else if (st.size() >= 2 &&
+//					bad(st[st.size() - 2].first, st[st.size() - 1].first,
+//						lines[i])) {
+//					st.pop_back();
+//				}
+//				else {
+//					break;
+//				}
+//			}
+//			if (!flag) st.push_back({ lines[i], i });
+//		}
+//	}
+//
+//	vector<int> en(lines.size(), -1);
+//	vector<point> ans;
+//	for (int i = 0; i < (int)st.size(); i++) {
+//		if (en[st[i].second] == -1) {
+//			en[st[i].second] = i;
+//			continue;
+//		}
+//		for (int j = en[st[i].second]; j < i; j++) {
+//			point I = intersect(st[j].first, st[j + 1].first);
+//			ans.push_back(I);
+//		}
+//		break;
+//	}
+//	return ans;
+//}
