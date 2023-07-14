@@ -65,6 +65,21 @@ struct circle {
 point getvec(line a) {
 	return { -a.b, a.a };
 }
+pair<point, point> intersect(circle a, circle b) {
+	if (a.r + b.r < dist(a.c, b.c)) {
+		return{ {inf,inf},{inf,inf} };
+	}
+	if (dist(a.c, b.c) + a.r < b.r - EPS) return { {inf,inf},{inf,inf} };
+	if (dist(a.c, b.c) +b.r < a.r - EPS) return { {inf,inf},{inf,inf} };
+	point v = b.c - a.c;
+	ld d = dist(a.c, b.c);
+	ld x = (a.r * a.r - b.r * b.r + d * d) / (d * 2);
+	ld ang = acos(x / a.r);
+	ld cs = x / a.r;
+	ld ss = mysqrt(1 - cs * cs);
+	v = v * (a.r / d);
+	return { a.c + spin(v, cs, ss), a.c + spin(v, cs, -ss) };
+}
 pair<point, point> intersect(circle a, line b) {
 	line pp = perp(b, a.c);
 	point xx = intersect(pp, b);
