@@ -65,6 +65,9 @@ struct circle {
 point getvec(line a) {
 	return { -a.b, a.a };
 }
+ld mysqrt(ld x) {
+	return (x < 0 ? 0 : sqrt(x));
+}
 pair<point, point> intersect(circle a, circle b) {
 	if (a.r + b.r < dist(a.c, b.c)) {
 		return{ {inf,inf},{inf,inf} };
