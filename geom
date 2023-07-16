@@ -158,6 +158,28 @@ bool bad(line a, line b, line c) {
 	return a.eval(x) > 0;
 }
 
+void tangents(point c, ld r1, ld r2, vector<line>& ans) {
+	ld r = r2 - r1;
+	ld z = c.x * c.x + c.y * c.y;
+	ld d = z - r * r;
+	if (d < -EPS)  return;
+	d = sqrt(abs(d));
+	line l;
+	l.a = (c.x * r + c.y * d) / z;
+	l.b = (c.y * r - c.x * d) / z;
+	l.c = r1;
+	ans.push_back(l);
+}
+
+vector<line> tangents(circle a, circle b) {
+	vector<line> ans;
+	for (int i = -1; i <= 1; i += 2)
+		for (int j = -1; j <= 1; j += 2)
+			tangents(b.c - a.c, a.r * i, b.r * j, ans);
+	for (size_t i = 0; i < ans.size(); ++i)
+		ans[i].c -= ans[i].a * a.c.x + ans[i].b * a.c.y;
+	return ans;
+}
 // Do not forget about the bounding box
 vector<point> hpi(vector<line> lines) {
 	ld C = 1e6;
