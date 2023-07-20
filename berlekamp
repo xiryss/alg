@@ -1,0 +1,71 @@
+
+template<unsigned mod = 998244353>struct fp {
+	using uint = unsigned; uint v;
+	static uint get_mod() { return mod; }
+	int inv() const {
+		int tmp, a = v, b = mod, x = 1, y = 0;
+		while (b)tmp = a / b, a -= tmp * b, swap(a, b), x -= tmp * y, swap(x, y);
+		if (x < 0) { x += mod; } return x;
+	}
+	fp(ll x) {
+		init(x % mod + mod);
+	}
+	fp() {
+		init(0);
+	}
+	fp& init(uint x) { v = (x < mod ? x : x - mod); return *this; }
+	fp operator-()const { return fp() - *this; }
+	fp pow(ll t) { fp res = 1, b = *this; while (t) { if (t & 1)res *= b; b *= b; t >>= 1; } return res; }
+	fp& operator+=(const fp& x) { return init(v + x.v); }
+	fp& operator-=(const fp& x) { return init(v + mod - x.v); }
+	fp& operator*=(const fp& x) { v = ll(v) * x.v % mod; return *this; }
+	fp& operator/=(const fp& x) { v = ll(v) * x.inv() % mod; return *this; }
+	fp operator+(const fp& x)const { return fp(*this) += x; }
+	fp operator-(const fp& x)const { return fp(*this) -= x; }
+	fp operator*(const fp& x)const { return fp(*this) *= x; }
+	fp operator/(const fp& x)const { return fp(*this) /= x; }
+	bool operator==(const fp& x)const { return v == x.v; }
+	bool operator!=(const fp& x)const { return v != x.v; }
+	friend istream& operator>>(istream& is, fp& x) { is >> x.v; return is; }
+	friend ostream& operator<<(ostream& os, const fp& x) { os << x.v; return os; }
+}; using Fp = fp<>;
+template<typename T>struct factorial {
+	vector<T> Fact, Finv, Inv;
+	factorial(int maxx) {
+		Fact.resize(maxx); Finv.resize(maxx); Inv.resize(maxx);
+		Fact[0] = Fact[1] = Finv[0] = Finv[1] = Inv[1] = 1;
+		for (int i = 2; i < maxx; ++i) { Fact[i] = Fact[i - 1] * i; } Finv[maxx - 1] = Fact[maxx - 1].inv();
+		for (int i = maxx - 1; i >= 2; i--) { Finv[i - 1] = Finv[i] * i; Inv[i] = Finv[i] * Fact[i - 1]; }
+	}
+	T fact(int n, bool inv = 0) { if (n < 0)return 0; return (inv ? Finv[n] : Fact[n]); }
+	T inv(int n) { if (n < 0)return 0; return Inv[n]; }
+	T nPr(int n, int r, bool inv = 0) { if (n < 0 || n < r || r < 0)return 0; return fact(n, inv) * fact(n - r, inv ^ 1); }
+	T nCr(int n, int r, bool inv = 0) { if (n < 0 || n < r || r < 0)return 0; return fact(n, inv) * fact(r, inv ^ 1) * fact(n - r, inv ^ 1); }
+};
+
+vector<Fp> BerlekampMassey(vector<Fp>& a) {
+	int n = a.size(); Fp d = 1;
+	vector<Fp> b(1), c(1);
+	b[0] = 1;
+	c[0] = 1;
+	for (int j = 1; j < n + 1; ++j) {
+		int l = c.size(), m = b.size();
+		Fp x = 0;
+		for (int i = 0; i < l; ++i)x += c[i] * a[j - l + i];
+		b.push_back(0);
+		m++;
+		if (x == 0)continue;
+		Fp coeff = -x / d;
+		if (l < m) {
+			auto tmp = c;
+			c.insert(c.begin(), m - l, 0);
+			for (int i = 0; i < m; ++i)c[m - 1 - i] += coeff * b[m - 1 - i];
+			b = tmp; d = x;
+		}
+		else for (int i = 0; i < m; ++i)c[l - 1 - i] += coeff * b[m - 1 - i];
+	}
+	c.pop_back();
+	reverse(all(c));
+	for (auto& x : c)x = -x;
+	return c;
+}
