@@ -22,5 +22,5 @@ void upd(int v, int l, int r, int ql, int qr, int x) {
 	}
 	upd(2 * v + 1, l, (l + r) / 2, ql, qr, x);
 	upd(2 * v + 2, (l + r) / 2, r, ql, qr, x);
-	t[v] = min(t[2 * v + 1], t[2 * v + 2]);
+	t[v] = t[2 * v + 1] + t[2 * v + 2];
 }
