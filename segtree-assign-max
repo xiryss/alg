@@ -1,0 +1,26 @@
+int t[4 * MAXN];
+int add[4 * MAXN];
+void push(int v, int l, int r) {
+	if (add[v] == -1) return;
+	if (l != r - 1) add[2 * v + 1] = add[2 * v + 2] = add[v];
+	t[v] = add[v] * (r - l);
+	add[v] = -1;
+}
+int get(int v, int l, int r, int ql, int qr) {
+	push(v, l, r);
+	if (l >= qr || ql >= r) return 0;
+	if (l >= ql && r <= qr) return t[v];
+	return get(2 * v + 1, l, (l + r) / 2, ql, qr) + get(2 * v + 2, (l + r) / 2, r, ql, qr);
+}
+void upd(int v, int l, int r, int ql, int qr, int x) {
+	push(v, l, r);
+	if (l >= qr || qr >= l) return;
+	if (l >= ql && r <= qr) {
+		add[v] = x;
+		push(v, l, r);
+		return;
+	}
+	upd(2 * v + 1, l, (l + r) / 2, ql, qr, x);
+	upd(2 * v + 2, (l + r) / 2, r, ql, qr, x);
+	t[v] = min(t[2 * v + 1], t[2 * v + 2]);
+}
