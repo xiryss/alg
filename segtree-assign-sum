@@ -1,20 +1,33 @@
+#define int ll
 int t[4 * MAXN];
 int add[4 * MAXN];
+int fs[4 * MAXN];
+int mn[4 * MAXN];
 void push(int v, int l, int r) {
 	if (add[v] == -1) return;
 	if (l != r - 1) add[2 * v + 1] = add[2 * v + 2] = add[v];
 	t[v] = add[v] * (r - l);
+	fs[v] = add[v];
+	mn[v] = add[v];
 	add[v] = -1;
 }
 int get(int v, int l, int r, int ql, int qr) {
+	if (ql >= qr) return 0;
 	push(v, l, r);
 	if (l >= qr || ql >= r) return 0;
 	if (l >= ql && r <= qr) return t[v];
 	return get(2 * v + 1, l, (l + r) / 2, ql, qr) + get(2 * v + 2, (l + r) / 2, r, ql, qr);
 }
-void upd(int v, int l, int r, int ql, int qr, int x) {
+int getp(int v, int l, int r, int p) {
 	push(v, l, r);
-	if (l >= qr || qr >= l) return;
+	if (l == r - 1) return t[v];
+	if ((l + r) / 2 > p) return getp(2 * v + 1, l, (l + r) / 2, p);
+	else return getp(2 * v + 2, (l + r) / 2, r, p);
+}
+void upd(int v, int l, int r, int ql, int qr, int x) {
+	if (ql >= qr) return;
+	push(v, l, r);
+	if (l >= qr || ql >= r) return;
 	if (l >= ql && r <= qr) {
 		add[v] = x;
 		push(v, l, r);
@@ -23,4 +36,29 @@ void upd(int v, int l, int r, int ql, int qr, int x) {
 	upd(2 * v + 1, l, (l + r) / 2, ql, qr, x);
 	upd(2 * v + 2, (l + r) / 2, r, ql, qr, x);
 	t[v] = t[2 * v + 1] + t[2 * v + 2];
+	fs[v] = fs[2 * v + 1];
+	mn[v] = min(mn[2 * v + 1], mn[2 * v + 2]);
+}
+int godown(int v, int l, int r, int p, int y) {
+	push(v, l, r);
+	if (mn[v] > y) return inf;
+	if (p >= r) return inf;
+	if (l == r - 1) {
+		return l;
+	}
+	int gg = godown(2 * v + 1, l, (l + r) / 2, p, y);
+	if (gg != inf) return gg;
+	return godown(2 * v + 2, (l + r) / 2, r, p, y);
+}
+int sgodown(int v, int l, int r, int sum) {
+	push(v, l, r);
+	if (fs[v] > sum)return inf;
+	if (sum <= 0) return inf;
+	if (l == r - 1) {
+		return l;
+	}
+	push(2 * v + 1, l, (l + r) / 2);
+	int gg = sgodown(2 * v + 2, (l + r) / 2, r, sum - t[2 * v + 1]);
+	if (gg == inf) gg = sgodown(2 * v + 1, l, (l + r) / 2, sum);
+	return gg;
 }
