@@ -388,7 +388,7 @@ template < unsigned mod = MOD > struct Poly {
             + d1 - d2 + 1)) * Poly(g).inv(d1 - d2 + 1)
             ;
         vector <Mint > t = vector <Mint >(H.a.begin(), H.a.
-            begin() + d1 - d2 + 1);
+            begin() + (d1 - d2 + 1));
         reverse(all(t));
         return *this = t;
     }
