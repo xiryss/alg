@@ -1,0 +1,69 @@
+vector<int> build(string s) {
+    s.pbc(1);
+    int n = s.size();
+    vector<int> c(n), cn(n);
+    vector<int> p(n), pn(n);
+    vector<int> cnt(max(n, 128));
+    for (auto i : s) cnt[i] ++;
+    for (int i = 1; i < 128; ++i) cnt[i] += cnt[i - 1];
+    for (int i = 0; i < n; ++i) {
+        p[--cnt[s[i]]] = i;
+    }
+    int cl = 0;
+    for (int i = 1; i < n; ++i) {
+        if (s[p[i]] != s[p[i - 1]]) {
+            ++cl;
+        }
+        c[p[i]] = cl;
+    }
+    for (int h = 0; (1 << h) < n; ++h) {
+        for (int i = 0; i < n; ++i) {
+            p[i] -= (1 << h);
+            if (p[i] < 0) p[i] += n;
+        }
+        for (int j = 0; j <= cl; ++j) cnt[j] = 0;
+        for (int i = 0; i < n; ++i) {
+            cnt[c[i]]++;
+        }
+        for (int i = 1; i < n; ++i) cnt[i] += cnt[i - 1];
+        for (int i = n - 1; i >= 0; --i) {
+            pn[--cnt[c[p[i]]]] = p[i];
+        }
+        cl = 0;
+        cn[pn[0]] = 0;
+        for (int i = 1; i < n; ++i) {
+            int x1 = pn[i] + (1 << h);
+            int x2 = pn[i - 1] + (1 << h);
+            if (x1 >= n) x1 -= n;
+            if (x2 >= n) x2 -= n;
+            if (c[pn[i]] != c[pn[i - 1]] || c[x1] != c[x2]) {
+                ++cl;
+            }
+            cn[pn[i]] = cl;
+        }
+        swap(c, cn);
+        swap(p, pn);
+    }
+    //p.erase(p.begin());
+    return p;
+}
+vector<int> buildlcp(string s, vector<int> p) {
+    s.pbc(1);
+    int n = s.size();
+    vector<int> lcp(n);
+    vector<int> pos(n);
+    for (int i = 0; i < n; ++i) pos[p[i]] = i;
+    int k = 0;
+    for (int i = 0; i < n; ++i) {
+        if (k)--k;
+        if (pos[i] == n - 1) {
+            lcp[n - 1] = -1;
+            k = 0;
+            continue;
+        }
+        int j = p[pos[i] + 1];
+        while (max(i + k, j + k) < n && s[i + k] == s[j + k])++k;
+        lcp[pos[i]] = k;
+    }
+    return lcp;
+}
