@@ -1,0 +1,45 @@
+
+#define int ll
+int exgcd(int a, int b, int &x, int &y) {
+    if (a == 0) {
+        y = 1, x = 0;
+        return b;
+    }
+    int x1, y1;
+    int d = exgcd(b % a, a, x1, y1);
+    //(b - (b/a) * a) * x1 + ay1 = d
+    x = y1 - (b / a) * x1;
+    y = x1;
+    return d;
+}
+int gcd(int a, int b) {
+    while (b) {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+int lcm(int a, int b) { return a / gcd(a, b) * b; }
+int crt(int a, int b, int c, int d) {
+    int lc = lcm(c, d);
+    if (abs(a - b) % gcd(c, d)) {
+        return -inf;
+    }
+    int go = (b - a) / gcd(c, d);
+    int k1, k2;
+    int da = exgcd(c, d, k1, k2);
+    if (abs(k1) > 1e9)
+        assert(0);
+    if (abs(go) > 1e9)
+        assert(0);
+    k1 *= go;
+    k1 %= lc;
+    int x = a + ((__int128_t)k1 * c % lc);
+    x %= lc;
+    if (x < 0)
+        x += lc;
+    assert(x >= 0 && x < lc);
+    assert(x % c == a && x % d == b);
+    assert(lc <= INF);
+    return x;
+}
