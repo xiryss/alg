@@ -100,6 +100,8 @@ ld getangle(point a, point b) {
 ld trsq(point a, point b) {
 	return abs(a * b) / 2;
 }
+
+ld ortrsq(point a, point b) { return a * b / 2; }
 ld disttoseg(point a, point s1, point s2) {
 	if ((a - s1) % (s2 - s1) >= 0 && (a - s2) % (s1 - s2) >= 0) return distline(a, getln(s1, s2));
 	return min(dist(a, s1), dist(a, s2));
