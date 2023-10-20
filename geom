@@ -183,87 +183,70 @@ vector<line> tangents(circle a, circle b) {
 	return ans;
 }
 // Do not forget about the bounding box
+
 vector<point> hpi(vector<line> lines) {
-	ld C = 1e6;
-	vector<point> pts = { {-C,-C},{C,-C},{C,C},{-C,C} };
-	for (auto i : lines) {
-		vector<point> newpts;
-		vector<point> consider;
-		for (int j = 0; j < pts.size(); ++j) {
-			consider.pbc(pts[j]);
-			point pt = intersect(i, getln(pts[j], pts[(j + 1) % pts.size()]));
-			if (onseg(pts[j], pts[(j + 1) % pts.size()], pt)) {
-				consider.pbc(pt);
-			}
-		}
-		for (auto j : consider) {
-			if (i.eval(j) >= -EPS) {
-				if (newpts.size() && dist(newpts.back(), j) < EPS) {
-					continue;
-				}
-				newpts.pbc(j);
-			}
-		}
-		if (newpts.size() && dist(newpts[0], newpts.back()) < EPS) newpts.pob;
-		swap(pts, newpts);
-	}
-	return pts;
+    for (auto &i : lines)
+        i.flip();
+    sort(all(lines), [](line al, line bl) -> bool {
+        point a = getvec(al);
+        point b = getvec(bl);
+        if (a.y >= 0 && b.y < 0)
+            return 1;
+        if (a.y < 0 && b.y >= 0)
+            return 0;
+        if (a.y == 0 && b.y == 0)
+            return a.x > 0 && b.x < 0;
+        return (a * b) > 0;
+    });
+    vector<pair<line, int>> st;
+    for (int it = 0; it < 2; it++) {
+        for (int i = 0; i < (int)lines.size(); i++) {
+            bool flag = false;
+            while (!st.empty()) {
+                if (len(getvec(st.back().first) - getvec(lines[i])) < EPS) {
+                    if (lines[i].c <= st.back().first.c) {
+                        flag = true;
+                        break;
+                    } else {
+                        st.pop_back();
+                    }
+                } else if ((getvec(st.back().first) * getvec(lines[i])) <
+                           EPS / 2) {
+                    // cout << "i suck" << endl;
+                    return {};
+                } else if (st.size() >= 2 &&
+                           bad(st[st.size() - 2].first, st[st.size() - 1].first,
+                               lines[i])) {
+                    st.pop_back();
+                } else {
+                    break;
+                }
+            }
+            if (!flag)
+                st.push_back({lines[i], i});
+        }
+    }
+
+    vector<int> en(lines.size(), -1);
+    vector<point> ans;
+    for (int i = 0; i < (int)st.size(); i++) {
+        if (en[st[i].second] == -1) {
+            en[st[i].second] = i;
+            continue;
+        }
+        for (int j = en[st[i].second]; j < i; j++) {
+            point I = intersect(st[j].first, st[j + 1].first);
+            ans.push_back(I);
+        }
+        break;
+    }
+    return ans;
 }
-//vector<point> hpi(vector<line> lines) {
-//	sort(all(lines), [](line al, line bl) -> bool {
-//		point a = getvec(al);
-//		point b = getvec(bl);
-//		if (a.y >= 0 && b.y < 0) return 1;
-//		if (a.y < 0 && b.y >= 0) return 0;
-//		if (a.y == 0 && b.y == 0) return a.x > 0 && b.x < 0;
-//		return (a * b) > 0;
-//		});
-//	for (auto i : lines) {
-//		cout << i.a << ' ' << i.b << ' ' << i.c << endl;
-//	}
-//	vector<pair<line, int> > st;
-//	for (int it = 0; it < 2; it++) {
-//		for (int i = 0; i < (int)lines.size(); i++) {
-//			bool flag = false;
-//			while (!st.empty()) {
-//				if (len(getvec(st.back().first) - getvec(lines[i])) < EPS) {
-//					if (lines[i].c <= st.back().first.c) {
-//						flag = true;
-//						break;
-//					}
-//					else {
-//						st.pop_back();
-//					}
-//				}
-//				else if ((getvec(st.back().first) * getvec(lines[i])) <
-//					EPS / 2) {
-//					return {};
-//				}
-//				else if (st.size() >= 2 &&
-//					bad(st[st.size() - 2].first, st[st.size() - 1].first,
-//						lines[i])) {
-//					st.pop_back();
-//				}
-//				else {
-//					break;
-//				}
-//			}
-//			if (!flag) st.push_back({ lines[i], i });
-//		}
-//	}
-//
-//	vector<int> en(lines.size(), -1);
-//	vector<point> ans;
-//	for (int i = 0; i < (int)st.size(); i++) {
-//		if (en[st[i].second] == -1) {
-//			en[st[i].second] = i;
-//			continue;
-//		}
-//		for (int j = en[st[i].second]; j < i; j++) {
-//			point I = intersect(st[j].first, st[j + 1].first);
-//			ans.push_back(I);
-//		}
-//		break;
-//	}
-//	return ans;
-//}
+ld area(vector<point> a) {
+    ld res = 0;
+    int n = a.size();
+    for (int i = 0; i < n; ++i) {
+        res += ortrsq(a[i], a[(i + 1) % n]);
+    }
+    return abs(res);
+}
